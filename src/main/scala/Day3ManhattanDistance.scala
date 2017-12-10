@@ -34,30 +34,76 @@ store the sum of the values in all adjacent squares, including diagonals.
 
 package jpickard.misc
 
+// refactor so path is it's own thing, that has a direction. can create new path with an initial direction
 class Day3ManhattanDistance {
 
   def manhattanDisTo(target: Int) = {
-    var current = 1
-    var curLoc = new Location(0, 0)
-    var dirIdx = 0
-    var pathNum = 1
-    var pathStepRemain = Direction.pathLength(pathNum)
-    while (current < target) {
-      if (pathStepRemain == 0) {
-        dirIdx = Direction.nextDirectionIdx(dirIdx)
-        pathNum += 1
-        pathStepRemain = Direction.pathLength(pathNum)
-      }
+    var currentNum = 1
+    var path = new Path(1, new Location(0,0), new Direction)
 
-      current += 1
-      pathStepRemain -= 1
-      curLoc = curLoc.step(dirIdx)
+    while (currentNum < target) {
+      currentNum += 1
+      path = path.step
     }
-    calcManhattanDistance(new Location(0, 0), curLoc)
+    calcManhattanDistance(new Location(0,0), path.curLoc)
   }
 
   def calcManhattanDistance(loc1: Location, loc2: Location) =
     Math.abs(loc1.i - loc2.i) + Math.abs(loc1.j - loc2.j)
+}
+
+class Day3ManhattanGrid (val w: Int, val h: Int) {
+  var grid = _buildGrid
+
+  def firstLargerThan(target: Int) = {
+    grid = _buildGrid
+    var path = new Path(1, new Location(w/2, h/2), new Direction)
+    setVal(1, path.curLoc)
+    while (getVal(path.curLoc) <= target) {
+      path = path.step
+      setVal(calcVal(path.curLoc),path.curLoc)
+    }
+    getVal(path.curLoc)
+  }
+
+  private def setVal(v: Int, loc: Location) = grid(loc.i)(loc.j) = v
+  private def getVal(loc: Location) = grid(loc.i)(loc.j)
+
+  private def calcVal(loc: Location) =
+    grid(loc.i - 1)(loc.j - 1) + grid(loc.i)(loc.j - 1) + grid(loc.i + 1)(loc.j - 1) +
+    grid(loc.i - 1)(loc.j + 1) + grid(loc.i)(loc.j + 1) + grid(loc.i + 1)(loc.j + 1) +
+    grid(loc.i - 1)(loc.j) + grid(loc.i + 1)(loc.j)
+
+  private def _buildGrid = {
+    val g = new Array[Array[Int]](h)
+    g.map(x => new Array[Int](w))
+  }
+}
+
+class Path (val pathNum: Int, var curLoc: Location, val dir: Direction) {
+  var pathStepRemain = Math.ceil(pathNum / 2.0).toInt
+
+  def step = {
+    pathStepRemain match {
+      case 1 => new Path(pathNum + 1, curLoc.step(dir), dir.nextDirection)
+      case _ => {
+        curLoc = curLoc.step(dir)
+        pathStepRemain -= 1
+        this
+      }
+    }
+  }
+}
+
+class Direction (val dirIdx: Int = 0) {
+  private val directionOrder = List(Direction.RIGHT, Direction.UP, Direction.LEFT, Direction.DOWN)
+
+  def direction = directionOrder(dirIdx)
+
+  def nextDirection = dirIdx >= directionOrder.length - 1 match {
+    case true => new Direction
+    case false => new Direction(dirIdx + 1)
+  }
 }
 
 object Direction {
@@ -65,26 +111,12 @@ object Direction {
   val RIGHT = "RIGHT"
   val UP = "UP"
   val DOWN = "DOWN"
-  private val directionOrder = List(RIGHT, UP, LEFT, DOWN)
-
-  def nextDirectionIdx(curDirIdx: Int) =
-    curDirIdx >= directionOrder.length - 1 match {
-      case true => 0
-      case false => curDirIdx + 1
-    }
-
-  def curDirection(directionIdx: Int) = directionOrder(directionIdx)
-
-  // pathNum is the numeric order of current straight run. length of straight run is pathNum/2 rounded up
-  def pathLength(pathNum: Int) = Math.ceil(pathNum / 2).toInt
 }
 
 class Location(val i: Int, val j: Int) {
 
-  def step(dirIdx: Int): Location = step(Direction.curDirection(dirIdx))
-
-  def step(direction: String): Location =
-    direction match {
+  def step(direction: Direction): Location =
+    direction.direction match {
       case Direction.RIGHT => new Location(i, j + 1)
       case Direction.LEFT  => new Location(i, j - 1)
       case Direction.UP    => new Location(i - 1, j)
@@ -101,5 +133,12 @@ object Day3ManhattanDistance {
     println("distance to 1024 (31 exp): " + disCalc.manhattanDisTo(1024))
 
     println("answer for 361527: " + disCalc.manhattanDisTo(361527))
+
+    val gridCalc = new Day3ManhattanGrid(11,11)
+    println("first larger than 2 (4 exp): " + gridCalc.firstLargerThan(2))
+    println("first larger than 5 (10 exp): " + gridCalc.firstLargerThan(5))
+    println("first larger than 57 (59 exp): " + gridCalc.firstLargerThan(57))
+    println("first larger than 304 (330 exp): " + gridCalc.firstLargerThan(304))
+    println("answer for 361527: " + gridCalc.firstLargerThan(361527))
   }
 }

@@ -1,4 +1,4 @@
-package jpickard.misc
+package jpickard.adventofcode
 
 class Spreadsheet(val data: List[List[Int]]) {
 

@@ -22,7 +22,7 @@ For example:
 
  */
 
-package jpickard.misc
+package jpickard.adventofcode
 
 import scala.annotation.tailrec
 

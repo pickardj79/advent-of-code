@@ -32,7 +32,7 @@ store the sum of the values in all adjacent squares, including diagonals.
 
  */
 
-package jpickard.misc
+package jpickard.adventofcode
 
 // refactor so path is it's own thing, that has a direction. can create new path with an initial direction
 class Day3ManhattanDistance {

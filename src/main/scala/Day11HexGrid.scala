@@ -21,7 +21,7 @@ For example:
 Hexgrid algorithms from: https://www.redblobgames.com/grids/hexagons/
  */
 
-package jpickard.misc
+package jpickard.adventofcode
 
 import scala.annotation.tailrec
 import scala.io.Source
